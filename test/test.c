@@ -42,9 +42,10 @@ int main() {
     free(popped);
     printHead(&list);
     printTail(&list);
-    popped = lrsll_popBack( &list );
-    fprintf(stdout, "\nPopped %s", popped);
-    free(popped);
+    lrsll_node *deletedNode = lrsll_delete( &list, "test" );
+    fprintf(stdout, "\nDeleted %s", deletedNode->data);
+    free(deletedNode->data);
+    free(deletedNode);
     printHead(&list);
     printTail(&list);
 }

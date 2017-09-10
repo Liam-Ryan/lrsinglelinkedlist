@@ -86,6 +86,7 @@ char *lrsll_popBack(lrsll_list **list) {
         (*list)->head = NULL;
     } else {
         (*list)->tail = *newTail;
+        (*list)->tail->next = NULL;
     }
     free(oldTail->data);
     free(oldTail);
@@ -104,7 +105,21 @@ lrsll_node *lrsll_find(lrsll_list **list, char *data) {
 };
 
 lrsll_node *lrsll_delete(lrsll_list **list, char *data){
+    lrsll_node **node = &(*list)->head;
+    while( *node && strcmp((*node)->data, data) != 0 ) {
+        node = &(*node)->next;
+    }
+    if( *node == NULL)
+        return NULL;
 
+    lrsll_node *deleted = *node;
+    (*node)->next = deleted->next;
+
+    if( deleted == (*list)->tail) {
+        (*list)->tail = NULL;
+        (*list)->head = NULL;
+    }
+    return deleted;
 };
 
 bool lrsll_isEmpty(lrsll_list **list) {
