@@ -1,6 +1,13 @@
 #include <malloc.h>
 #include <mem.h>
+#include <stdio.h>
 #include "lrsll.h"
+
+void printNodeDebug(lrsll_node *node) {
+    if (node != NULL)
+        fprintf(stdout, "\nNode with data %s has pointer address %p and next pointer is %p", node->data, node,
+                node->next);
+}
 
 lrsll_node *lrsll_push(lrsll_list **list, char *data) {
     lrsll_list *listRef = *list;
@@ -45,7 +52,7 @@ char *lrsll_popFront(lrsll_list **list) {
     return string;
 };
 
-lrsll_node *lrsll_append(lrsll_list **list, char *data){
+lrsll_node *lrsll_append(lrsll_list **list, char *data) {
     lrsll_list *listRef = *list;
     if (listRef == NULL) {
         listRef = malloc(sizeof(lrsll_list));
@@ -54,7 +61,7 @@ lrsll_node *lrsll_append(lrsll_list **list, char *data){
     lrsll_node *node = malloc(sizeof(lrsll_node));
     node->data = strdup(data);
     node->next = NULL;
-    if(listRef->tail) {
+    if (listRef->tail) {
         listRef->tail->next = node;
         listRef->tail = node;
     } else {
@@ -78,7 +85,7 @@ char *lrsll_popBack(lrsll_list **list) {
     char *string = strdup(oldTail->data);
 
     lrsll_node **newTail = &(*list)->head;
-    while (oldTail != *newTail && oldTail != (*newTail)->next ) {
+    while (oldTail != *newTail && oldTail != (*newTail)->next) {
         newTail = &(*newTail)->next;
     }
     if (oldTail == *newTail) {
@@ -95,30 +102,37 @@ char *lrsll_popBack(lrsll_list **list) {
 };
 
 lrsll_node *lrsll_find(lrsll_list **list, char *data) {
-    if (lrsll_isEmpty( list ))
+    if (lrsll_isEmpty(list))
         return NULL;
     lrsll_node *n = (*list)->head;
-    while( n && strcmp(n->data, data) != 0 ) {
+    while (n && strcmp(n->data, data) != 0) {
         n = n->next;
     }
     return n;
 };
 
-lrsll_node *lrsll_delete(lrsll_list **list, char *data){
+lrsll_node *lrsll_delete(lrsll_list **list, char *data) {
     lrsll_node **node = &(*list)->head;
-    while( *node && strcmp((*node)->data, data) != 0 ) {
+    printNodeDebug(*node);
+    while (*node && strcmp((*node)->data, data) != 0) {
         node = &(*node)->next;
+        printNodeDebug(*node);
     }
-    if( *node == NULL)
+    if (*node == NULL)
         return NULL;
 
+    fprintf(stdout, "\nDeleting node:");
+    printNodeDebug(*node);
     lrsll_node *deleted = *node;
-    (*node)->next = deleted->next;
+    *node = deleted->next;
+    fprintf(stdout, "\nSetting new node:");
+    printNodeDebug(*node);
 
-    if( deleted == (*list)->tail) {
+
+    if (deleted == (*list)->tail) {
         (*list)->tail = NULL;
-        (*list)->head = NULL;
     }
+
     return deleted;
 };
 
@@ -126,6 +140,37 @@ bool lrsll_isEmpty(lrsll_list **list) {
     return list == NULL || *list == NULL || (*list)->head == NULL;
 };
 
-lrsll_node *lrsll_addBefore(lrsll_list **list, char *data, char *item);
+lrsll_node *lrsll_addBefore(lrsll_list **list, char *data, char *item) {
+    lrsll_node **node = &(*list)->head;
+    while (*node && strcmp((*node)->data, item) != 0) {
+        node = &(*node)->next;
+    }
 
-lrsll_node *lrsll_addAfter(lrsll_list **list, char *data, char *item);
+    if (*node == NULL)
+        return *node;
+
+    lrsll_node *newNode = malloc(sizeof(lrsll_node));
+    newNode->data = strdup(data);
+    newNode->next = (*node);
+    *node = newNode;
+    return newNode;
+
+};
+
+lrsll_node *lrsll_addAfter(lrsll_list **list, char *data, char *item) {
+    lrsll_node **node = &(*list)->head;
+    while (*node && strcmp((*node)->data, item) != 0) {
+        node = &(*node)->next;
+    }
+
+    if (*node == NULL)
+        return *node;
+
+    lrsll_node *newNode = malloc(sizeof(lrsll_node));
+    newNode->data = strdup(data);
+    newNode->next = (*node)->next;
+    (*node)->next = newNode;
+    if (newNode->next == NULL)
+        (*list)->tail = newNode;
+    return newNode;
+};

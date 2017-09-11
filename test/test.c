@@ -20,32 +20,83 @@ void printTail(lrsll_list **list) {
 }
 
 int main() {
+
     lrsll_list *list = createList();
     printHead(&list);
     printTail(&list);
+
     lrsll_push(&list, "test");
     printHead(&list);
     printTail(&list);
+
     lrsll_push(&list, "othertest");
     printHead(&list);
     printTail(&list);
+
     lrsll_append(&list, "appendTest");
     printHead(&list);
     printTail(&list);
+
+    lrsll_append(&list, "appendTest2");
+    printHead(&list);
+    printTail(&list);
+
     char *popped = lrsll_popFront(&list);
     fprintf(stdout, "\nPopped %s", popped);
     free(popped);
     printHead(&list);
     printTail(&list);
-    popped = lrsll_popBack( &list );
+
+    popped = lrsll_popBack(&list);
     fprintf(stdout, "\nPopped %s", popped);
     free(popped);
     printHead(&list);
     printTail(&list);
-    lrsll_node *deletedNode = lrsll_delete( &list, "test" );
+
+    lrsll_node *deletedNode = lrsll_delete(&list, "test");
     fprintf(stdout, "\nDeleted %s", deletedNode->data);
     free(deletedNode->data);
     free(deletedNode);
+
+    deletedNode = lrsll_delete(&list, "appendTest");
+    if (deletedNode != NULL) {
+        fprintf(stdout, "\nDeleted %s", deletedNode->data);
+        free(deletedNode->data);
+        free(deletedNode);
+    }
+
+    deletedNode = lrsll_delete(&list, "appendTest");
+    if (deletedNode != NULL) {
+        fprintf(stdout, "\nDeleted %s", deletedNode->data);
+        free(deletedNode->data);
+        free(deletedNode);
+    }
     printHead(&list);
     printTail(&list);
+
+    lrsll_addBefore(&list, "addbefore", "beforethis");
+    printHead(&list);
+    printTail(&list);
+
+    lrsll_addAfter(&list, "addAfter", "beforethis");
+    printHead(&list);
+    printTail(&list);
+
+    lrsll_push(&list, "beforethis");
+    printHead(&list);
+    printTail(&list);
+
+    lrsll_addBefore(&list, "addbefore", "beforethis");
+    printHead(&list);
+    printTail(&list);
+
+    lrsll_addBefore(&list, "beforeaddbefore", "addbefore");
+    printHead(&list);
+    printTail(&list);
+
+    lrsll_addAfter(&list, "addAfter", "beforethis");
+    printHead(&list);
+    printTail(&list);
+
+
 }
