@@ -122,8 +122,14 @@ lrsll_node *lrsll_delete(lrsll_list *list, char *data) {
 
 
     if (deleted == list->tail) {
-        list->tail = NULL;
-        //TODO check to make sure there's no elements before tail
+        /* if node is pointing to head we haven't moved meaning 1 element list so set tail to null
+         * Otherwise set tail to the address of the struct that node is currently on. This works because next is the first
+         * element declared in the struct so the address of node is the same as the address of node->next, we just need
+         * to cast it to an lrsll_node pointer. TODO - reimplement with offsetof macro 
+         *
+         * Credit to Austin Hastings on SE - https://codereview.stackexchange.com/questions/175398/delete-node-from-singly-linked-list-with-tail-pointer-in-c
+         * */
+        list->tail = (node == &list->head) ? NULL : (lrsll_node*)node;
     }
 
     return deleted;
