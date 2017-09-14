@@ -19,84 +19,109 @@ void printTail(lrsll_list *list) {
     printNode(lrsll_tail(list), "Tail");
 }
 
+
 int main() {
-
     lrsll_list *list = createList();
-    printHead(list);
-    printTail(list);
 
-    lrsll_push(list, "test");
-    printHead(list);
-    printTail(list);
+    /* Start test helper functions */
 
-    lrsll_push(list, "othertest");
-    printHead(list);
-    printTail(list);
-
-    lrsll_append(list, "appendTest");
-    printHead(list);
-    printTail(list);
-
-    lrsll_append(list, "appendTest2");
-    printHead(list);
-    printTail(list);
-
-    char *popped = lrsll_popFront(list);
-    fprintf(stdout, "\nPopped %s", popped);
-    free(popped);
-    printHead(list);
-    printTail(list);
-
-    popped = lrsll_popBack(list);
-    fprintf(stdout, "\nPopped %s", popped);
-    free(popped);
-    printHead(list);
-    printTail(list);
-
-    lrsll_node *deletedNode = lrsll_delete(list, "test");
-    fprintf(stdout, "\nDeleted %s", deletedNode->data);
-    free(deletedNode->data);
-    free(deletedNode);
-
-    deletedNode = lrsll_delete(list, "appendTest");
-    if (deletedNode != NULL) {
-        fprintf(stdout, "\nDeleted %s", deletedNode->data);
-        free(deletedNode->data);
-        free(deletedNode);
+    void printPointers() {
+        printHead(list);
+        printTail(list);
     }
 
-    deletedNode = lrsll_delete(list, "appendTest");
-    if (deletedNode != NULL) {
-        fprintf(stdout, "\nDeleted %s", deletedNode->data);
-        free(deletedNode->data);
-        free(deletedNode);
+    lrsll_node *add(bool append, char *item) {
+        fprintf(stdout, "\n\t%s %s to the list...", append ? "Appending" : "Pushing", item);
+        lrsll_node *result = append ? lrsll_append(list, item) : lrsll_push(list, item);
+        printPointers();
+        return result;
     }
-    printHead(list);
-    printTail(list);
 
-    lrsll_addBefore(list, "addbefore", "beforethis");
-    printHead(list);
-    printTail(list);
+    lrsll_node *push(char *item) {
+        return add(false, item);
+    }
 
-    lrsll_addAfter(list, "addAfter", "beforethis");
-    printHead(list);
-    printTail(list);
+    lrsll_node *append(char *item) {
+        return add(true, item);
+    }
 
-    lrsll_push(list, "beforethis");
-    printHead(list);
-    printTail(list);
+    void *retrieve(bool front) {
+        fprintf(stdout, "\n\t%s element from list...", front ? "Popping" : "Slicing");
+        char *returned = front ? lrsll_popFront(list) : lrsll_popBack(list);
+        fprintf(stdout, "\nRetrieved %s from list", returned ? returned : "nothing");
+        if (returned)
+            free(returned);
+        printPointers();
+    }
 
-    lrsll_addBefore(list, "addbefore", "beforethis");
-    printHead(list);
-    printTail(list);
+    char *pop() {
+        retrieve(true);
+    }
 
-    lrsll_addBefore(list, "beforeaddbefore", "addbefore");
-    printHead(list);
-    printTail(list);
+    char *slice() {
+        retrieve(false);
+    }
 
-    lrsll_addAfter(list, "addAfter", "beforethis");
-    printHead(list);
-    printTail(list);
+    void delete(char* item) {
+        fprintf(stdout, "\n\tDeleting %s from list...", item);
+        lrsll_node *deletedNode = lrsll_delete(list, item);
+        if(deletedNode) {
+            if (deletedNode->data) {
+                fprintf(stdout, "\nDeleted %s", deletedNode->data);
+                free(deletedNode->data);
+            }
+            free(deletedNode);
+        } else {
+            fprintf(stdout, "\n%s not found in list", item);
+        }
+    }
+
+    void addNextTo(bool after, char *data, char* searchItem) {
+        fprintf(stdout, "\n\tAttempting to add %s %s %s", data, after ? "after" : "before", searchItem);
+        lrsll_node *result = after ? lrsll_addAfter(list, data, searchItem) : lrsll_addBefore(list, data, searchItem);
+        if( result ) {
+            if( result->data) {
+                fprintf(stdout, "\nSuccessfully added %s", data);
+            }
+        } else {
+            fprintf(stdout, "\nCouldn't find %s in list", searchItem);
+        }
+        printPointers();
+    }
+
+    void addAfter( char *data, char* searchItem) {
+        addNextTo(true, data, searchItem);
+    }
+
+    void addBefore(char *data, char* searchItem) {
+        addNextTo(false, data, searchItem);
+    }
+
+    /*End test helper functions*/
+
+    printPointers();
+    push("C");
+    push("B");
+    push("A");
+    append("D");
+    append("E");
+
+    pop();
+    slice();
+    delete("Z");
+    delete("B");
+    delete("C");
+    delete("D");
+    delete("E");
+
+
+    addBefore("C", "A");
+    addAfter("B", "A");
+
+    push("C");
+    addBefore("B", "C");
+    addBefore("A", "B");
+    addAfter("D", "C");
 
 
 }
