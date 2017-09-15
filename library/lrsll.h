@@ -34,7 +34,7 @@ lrsll_node *lrsll_delete(lrsll_list *list, char *data);
 
 bool lrsll_isEmpty(lrsll_list *list);
 
-lrsll_node *lrsll_addBefore(lrsll_list *list, char *data, char *item);
+lrsll_node *lrsll_addBefore(lrsll_list *list, char *item, char *data);
 
 lrsll_node *lrsll_addAfter(lrsll_list *list, char *data, char *item);
 

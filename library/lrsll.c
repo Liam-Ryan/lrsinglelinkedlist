@@ -139,7 +139,7 @@ bool lrsll_isEmpty(lrsll_list *list) {
     return list == NULL || list->head == NULL;
 };
 
-lrsll_node *lrsll_addBefore(lrsll_list *list, char *data, char *item) {
+lrsll_node *lrsll_addBefore(lrsll_list *list, char *item, char *data) {
     lrsll_node **node = &list->head;
     while (*node && strcmp((*node)->data, item) != 0) {
         node = &(*node)->next;
