@@ -22,7 +22,7 @@ lrsll_list *createList() {
 
 //TODO investigate overloading in C
 lrsll_node *lrsll_createNode(char *data, lrsll_node *next) {
-    if( data == NULL || strlen(data) < 0)
+    if (data == NULL || strlen(data) < 0)
         return NULL;
     lrsll_node *node = malloc(sizeof(lrsll_node));
     node->data = strdup(data);
@@ -32,7 +32,7 @@ lrsll_node *lrsll_createNode(char *data, lrsll_node *next) {
 
 lrsll_node *lrsll_push(lrsll_list *list, char *data) {
     lrsll_node *node = lrsll_createNode(data, list->head);
-    if( !node)
+    if (!node)
         return NULL;
 
     list->head = node;
@@ -43,7 +43,7 @@ lrsll_node *lrsll_push(lrsll_list *list, char *data) {
 
 lrsll_node *lrsll_append(lrsll_list *list, char *data) {
 
-    lrsll_node *node =lrsll_createNode(data , NULL);
+    lrsll_node *node = lrsll_createNode(data, NULL);
     if (list->tail) {
         list->tail->next = node;
         list->tail = node;
@@ -129,14 +129,16 @@ lrsll_node *lrsll_delete(lrsll_list *list, char *data) {
 
 
     if (deleted == list->tail) {
-        /* if node is pointing to head we haven't moved meaning 1 element list so set tail to null
-         * Otherwise set tail to the address of the struct (lrsll_node) that node is currently on. This works because next is the first
+        /* if node is pointing to head we haven't moved meaning 1 element list so set tail to null Otherwise set tail to
+         * the address of the struct (lrsll_node) that node is currently on. This works because next is the first
          * element declared in the struct so the address of the current node is the same as the address of node.next
-         * since the pointer for node.next starts there, we just need to cast it to an lrsll_node pointer. TODO - reimplement with offsetof macro
+         * since the pointer for node.next starts there, we just need to cast it to an lrsll_node pointer.
+         * TODO - reimplement with offsetof macro
          *
-         * Credit to Austin Hastings on SE - https://codereview.stackexchange.com/questions/175398/delete-node-from-singly-linked-list-with-tail-pointer-in-c
+         * Credit to Austin Hastings on SE -
+         * https://codereview.stackexchange.com/questions/175398/delete-node-from-singly-linked-list-with-tail-pointer-in-c
          * */
-        list->tail = (node == &list->head) ? NULL : (lrsll_node*)node;
+        list->tail = (node == &list->head) ? NULL : (lrsll_node *) node;
     }
 
     return deleted;
