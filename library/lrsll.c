@@ -3,21 +3,15 @@
 #include <stdio.h>
 #include "lrsll.h"
 
-void printNodeDebug(lrsll_node *node) {
-    if (node != NULL)
-        fprintf(stdout, "\nNode with data %s has pointer address %p and next pointer is %p", node->data, node,
-                node->next);
+void lrsll_printList(lrsll_list *list) {
+    lrsll_node *temp = list->head;
+    fprintf(stdout, "\nCurrent list - \n");
+    while (temp && temp->data) {
+        fprintf(stdout, "\t%s", temp->data);
+        temp = temp->next;
+    }
+    fprintf(stdout, "%s", (list->head == temp) ? "\tEmpty" : "\n");
 }
-
-lrsll_node *lrsll_push(lrsll_list *list, char *data) {
-    lrsll_node *node = malloc(sizeof(lrsll_node));
-    node->data = strdup(data);
-    node->next = list->head;
-    list->head = node;
-    if (list->tail == NULL)
-        list->tail = node;
-    return node;
-};
 
 lrsll_list *createList() {
     lrsll_list *list = malloc(sizeof(lrsll_list));
@@ -26,9 +20,51 @@ lrsll_list *createList() {
     return list;
 }
 
+//TODO investigate overloading in C
+lrsll_node *lrsll_createNode(char *data, lrsll_node *next) {
+    if( data == NULL || strlen(data) < 0)
+        return NULL;
+    lrsll_node *node = malloc(sizeof(lrsll_node));
+    node->data = strdup(data);
+    node->next = next;
+    return node;
+}
+
+lrsll_node *lrsll_push(lrsll_list *list, char *data) {
+    lrsll_node *node = lrsll_createNode(data, list->head);
+    if( !node)
+        return NULL;
+
+    list->head = node;
+    if (list->tail == NULL)
+        list->tail = node;
+    return node;
+};
+
+lrsll_node *lrsll_append(lrsll_list *list, char *data) {
+
+    lrsll_node *node =lrsll_createNode(data , NULL);
+    if (list->tail) {
+        list->tail->next = node;
+        list->tail = node;
+    } else {
+        list->tail = node;
+        list->head = node;
+    }
+
+    return node;
+};
+
 lrsll_node *lrsll_top(lrsll_list *list) {
-    if (list != NULL)
+    if (!lrsll_isEmpty(list))
         return list->head;
+    return NULL;
+};
+
+lrsll_node *lrsll_tail(lrsll_list *list) {
+    if (list != NULL)
+        return list->tail;
+    return NULL;
 };
 
 char *lrsll_popFront(lrsll_list *list) {
@@ -45,28 +81,6 @@ char *lrsll_popFront(lrsll_list *list) {
     free(oldHead);
 
     return string;
-};
-
-lrsll_node *lrsll_append(lrsll_list *list, char *data) {
-
-    lrsll_node *node = malloc(sizeof(lrsll_node));
-    node->data = strdup(data);
-    node->next = NULL;
-    if (list->tail) {
-        list->tail->next = node;
-        list->tail = node;
-    } else {
-        list->tail = node;
-        list->head = node;
-    }
-
-    return node;
-};
-
-lrsll_node *lrsll_tail(lrsll_list *list) {
-    if (list != NULL)
-        return list->tail;
-    return NULL;
 };
 
 char *lrsll_popBack(lrsll_list *list) {
@@ -105,20 +119,13 @@ lrsll_node *lrsll_find(lrsll_list *list, char *data) {
 
 lrsll_node *lrsll_delete(lrsll_list *list, char *data) {
     lrsll_node **node = &list->head;
-    printNodeDebug(*node);
     while (*node && strcmp((*node)->data, data) != 0) {
         node = &(*node)->next;
-        printNodeDebug(*node);
     }
     if (*node == NULL)
         return NULL;
-
-    fprintf(stdout, "\nDeleting node:");
-    printNodeDebug(*node);
     lrsll_node *deleted = *node;
     *node = deleted->next;
-    fprintf(stdout, "\nSetting new node:");
-    printNodeDebug(*node);
 
 
     if (deleted == list->tail) {
@@ -148,15 +155,13 @@ lrsll_node *lrsll_addBefore(lrsll_list *list, char *item, char *data) {
     if (*node == NULL)
         return *node;
 
-    lrsll_node *newNode = malloc(sizeof(lrsll_node));
-    newNode->data = strdup(data);
-    newNode->next = (*node);
+    lrsll_node *newNode = lrsll_createNode(data, *node);
     *node = newNode;
     return newNode;
 
 };
 
-lrsll_node *lrsll_addAfter(lrsll_list *list, char *data, char *item) {
+lrsll_node *lrsll_addAfter(lrsll_list *list, char *item, char *data) {
     lrsll_node **node = &list->head;
     while (*node && strcmp((*node)->data, item) != 0) {
         node = &(*node)->next;
@@ -165,9 +170,7 @@ lrsll_node *lrsll_addAfter(lrsll_list *list, char *data, char *item) {
     if (*node == NULL)
         return *node;
 
-    lrsll_node *newNode = malloc(sizeof(lrsll_node));
-    newNode->data = strdup(data);
-    newNode->next = (*node)->next;
+    lrsll_node *newNode = lrsll_createNode(data, (*node)->next);
     (*node)->next = newNode;
     if (newNode->next == NULL)
         list->tail = newNode;

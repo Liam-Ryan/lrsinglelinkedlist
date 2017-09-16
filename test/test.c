@@ -5,7 +5,7 @@
 
 void printNode(lrsll_node *n, char *nodePosition) {
     if (n == NULL || n->data == NULL)
-        fprintf(stdout, "\nList is empty");
+        fprintf(stdout, "\n\t%s is NULL", nodePosition);
     else
         fprintf(stdout, "\n\t%s Node value is %s", nodePosition, n->data);
 }
@@ -19,6 +19,10 @@ void printTail(lrsll_list *list) {
     printNode(lrsll_tail(list), "Tail");
 }
 
+void info(char *string) {
+    fprintf(stdout, "\n---------------------------------\n\n%s:\n", string);
+}
+
 
 int main() {
     lrsll_list *list = createList();
@@ -26,13 +30,7 @@ int main() {
     /* Start test helper functions */
 
     void printList() {
-        lrsll_node *temp = list->head;
-        fprintf(stdout, "\nCurrent list - \n");
-        while (temp && temp->data) {
-            fprintf(stdout, "\t%s", temp->data);
-            temp = temp->next;
-        }
-        fprintf(stdout, "%s", (list->head == temp) ? "\tEmpty" : "\n");
+        lrsll_printList(list);
     }
 
     void printPointers() {
@@ -90,7 +88,7 @@ int main() {
 
     void addNextTo(bool after, char *data, char *searchItem) {
         fprintf(stdout, "\nAttempting to add %s %s %s", data, after ? "after" : "before", searchItem);
-        lrsll_node *result = after ? lrsll_addAfter(list, data, searchItem) : lrsll_addBefore(list, data, searchItem);
+        lrsll_node *result = after ? lrsll_addAfter(list, searchItem, data) : lrsll_addBefore(list, searchItem, data);
         if (result) {
             if (result->data) {
                 fprintf(stdout, "\n\tSuccessfully added %s", data);
@@ -101,16 +99,22 @@ int main() {
         printPointers();
     }
 
-    void addAfter(char *data, char *searchItem) {
+    void addAfter(char *searchItem, char *data) {
         addNextTo(true, data, searchItem);
     }
 
-    void addBefore(char *data, char *searchItem) {
+    void addBefore(char *searchItem, char *data) {
         addNextTo(false, data, searchItem);
     }
 
-    void info(char *string) {
-        fprintf(stdout, "\n%s:\n", string);
+    void find(char *searchItem) {
+        lrsll_node *result= lrsll_find( list, searchItem);
+        if(result && result->data) {
+            fprintf(stdout, "\n\tFound node %s", result->data);
+        } else {
+            fprintf(stdout, "\n\tCouldn't find %s", searchItem);
+        }
+        printPointers();
     }
 
 
@@ -119,10 +123,15 @@ int main() {
 
     info("Push and append");
     printPointers();
+    info("Push C");
     push("C");
+    info("Push B");
     push("B");
+    info("Push A");
     push("A");
+    info("Append D");
     append("D");
+    info("Append E");
     append("E");
 
     info("Pop");
@@ -135,18 +144,21 @@ int main() {
     delete("Z");
     info("Delete existing nodes from front of list");
     delete("B");
-    info("Delete existing nodes from back of list");
+    info("Append E for next test");
     append("E");
+    info("Delete existing nodes from back of list");
     delete("E");
-    info("Delete existing nodes from middle of list");
+    info("Push B for next test");
     push("B");
+    info("Delete existing nodes from middle of list");
     delete("C");
     info("Delete first node from list with two elements");
     delete("B");
     info("Add node back to front of list");
     push("C");
-    info("Delete last node in list with two elements");
+    info("Delete D for next test");
     delete("D");
+    info("Delete last node in list with two elements");
     delete("C");
     info("Delete non-existent node from empty list");
     delete("E");
@@ -156,31 +168,50 @@ int main() {
     addBefore("C", "A");
     info("Add after non-existent node in an empty list");
     addAfter("C", "A");
+    info("Push B for next test");
     push("B");
     info("Add before non-existent node in a 1 element list");
     addBefore("C", "F");
     info("Add after non-existent node in a 1 element list");
     addAfter("C", "F");
+    info("Push A for next test");
     push("A");
     info("Add before non-existent node in a > 1 element list");
     addBefore("C", "F");
     info("Add after non-existent node in a > 1 element list");
     addAfter("C", "F");
+    info("Pop for next test");
     pop();
     info("Add before node in a 1 element list");
     addBefore("B", "A");
+    info("Pop for next test");
     pop();
     info("Add after node in a 1 element list");
     addAfter("B", "C");
+    info("Push A for next test");
     push("A");
-    info("Add after node in a > 1 element list");
-    addBefore("B", "A1");
     info("Add before node in a > 1 element list");
+    addBefore("B", "A1");
+    info("Add after node in a > 1 element list");
     addAfter("B", "B1");
     info("Add before head node in a list");
     addBefore("A", "A-");
     info("Add after tail node in a list");
     addAfter("C", "D");
 
-
+    //search
+    info("Find first node");
+    find("A-");
+    info("Find last node");
+    find("D");
+    info("Find middle node");
+    find("B");
+    info("Find non-existent node");
+    find("Nope");
+    info("Empty list in preparation for find in empty list");
+    while(list->head) {
+        pop();
+    }
+    info("Find in empty list");
+    find("A");
 }
