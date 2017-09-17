@@ -1,6 +1,5 @@
 #include <malloc.h>
-#include <mem.h>
-#include <stdio.h>
+#include <string.h>
 #include "lrsll.h"
 
 void lrsll_printList(lrsll_list *list) {
