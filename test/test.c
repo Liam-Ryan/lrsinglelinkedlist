@@ -1,7 +1,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <check.h>
 #include "lrsll.h"
+
 
 void printNode(lrsll_node *n, char *nodePosition) {
     if (n == NULL || n->data == NULL)
@@ -24,8 +26,17 @@ void info(char *string) {
 }
 
 
+START_TEST(test_list_create)
+    {
+        lrsll_list *list;
+        list = lrsll_createList();
+        ck_assert_int_eq(1, 2);
+        free(list);
+    }
+END_TEST
+
 int main() {
-    lrsll_list *list = createList();
+    lrsll_list *list = lrsll_createList();
 
     /* Start test helper functions */
 
@@ -214,4 +225,5 @@ int main() {
     }
     info("Find in empty list");
     find("A");
+    return 0;
 }

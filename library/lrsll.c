@@ -12,7 +12,7 @@ void lrsll_printList(lrsll_list *list) {
     fprintf(stdout, "%s", (list->head == temp) ? "\tEmpty" : "\n");
 }
 
-lrsll_list *createList() {
+lrsll_list *lrsll_createList() {
     lrsll_list *list = malloc(sizeof(lrsll_list));
     list->head = NULL;
     list->tail = NULL;
