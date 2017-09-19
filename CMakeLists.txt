@@ -1,7 +1,7 @@
 project(lrsll C)
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake-build-debug")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 ###############################################################################
 # Set build features
