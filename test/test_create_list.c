@@ -7,7 +7,7 @@ START_TEST(test_create_list)
 {
     lrsll_list *list;
     list = lrsll_createList();
-    ck_assert_int_eq(0, 0);
+    ck_assert_int_eq(0, 1);
     free(list);
 }
 END_TEST
