@@ -1,4 +1,4 @@
-# CStaticLibSeed
+# lrsinglelinkedlist
 Single linked list implementation in C 
 
 Note this is a work in progress

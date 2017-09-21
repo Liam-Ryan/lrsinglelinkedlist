@@ -1,217 +1,530 @@
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <check.h>
 #include "lrsll.h"
 
-void printNode(lrsll_node *n, char *nodePosition) {
-    if (n == NULL || n->data == NULL)
-        fprintf(stdout, "\n\t%s is NULL", nodePosition);
-    else
-        fprintf(stdout, "\n\t%s Node value is %s", nodePosition, n->data);
+lrsll_list *list;
+
+void setup(void) {
+    list = lrsll_createList();
 }
 
-void printHead(lrsll_list *list) {
-    printNode(lrsll_top(list), "Top");
-
+void teardown(void) {
+    lrsll_freeList(list);
 }
 
-void printTail(lrsll_list *list) {
-    printNode(lrsll_tail(list), "Tail");
+void doNothing(void) {
+    list = NULL;
 }
 
-void info(char *string) {
-    fprintf(stdout, "\n---------------------------------\n\n%s:\n", string);
-}
+START_TEST(create_list)
+    {
+        ck_assert_ptr_ne(list, NULL);
+    }
+END_TEST
 
+START_TEST(free_empty_list_does_not_segfault)
+    {
+        lrsll_freeList(list);
+        ck_assert(true);
+    }
+END_TEST
+
+START_TEST(free_list_does_not_segfault)
+    {
+        lrsll_push(list, "A");
+        lrsll_freeList(list);
+        ck_assert(true);
+    }
+END_TEST
+
+START_TEST(free_node_does_not_segfault)
+    {
+        lrsll_node *test = malloc(sizeof(lrsll_node));
+        test->data = strdup("a");
+        test->next = NULL;
+        lrsll_freeNode(test);
+        ck_assert(true);
+        lrsll_freeList(list);
+    }
+END_TEST
+
+START_TEST(free_empty_node_does_not_segfault)
+    {
+        lrsll_freeNode(NULL);
+        ck_assert(true);
+        lrsll_freeList(list);
+    }
+END_TEST
+
+START_TEST(push)
+    {
+        lrsll_push(list, "B");
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "B");
+        lrsll_push(list, "A");
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "B");
+    }
+END_TEST
+
+START_TEST(append)
+    {
+        lrsll_append(list, "B");
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "B");
+        lrsll_append(list, "A");
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "A");
+    }
+END_TEST
+
+START_TEST(popFront)
+    {
+        char *returned;
+        lrsll_append(list, "A");
+        lrsll_append(list, "B");
+        lrsll_append(list, "C");
+
+        returned = lrsll_popFront(list);
+        ck_assert_str_eq(returned, "A");
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "C");
+        free(returned);
+        returned = lrsll_popFront(list);
+        ck_assert_str_eq(returned, "B");
+        ck_assert_str_eq(list->head->data, "C");
+        ck_assert_str_eq(list->tail->data, "C");
+        free(returned);
+        returned = lrsll_popFront(list);
+        ck_assert_str_eq(returned, "C");
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+        free(returned);
+    }
+END_TEST
+
+START_TEST(popBack)
+    {
+        char *returned;
+        lrsll_push(list, "A");
+        lrsll_push(list, "B");
+        lrsll_push(list, "C");
+
+        returned = lrsll_popBack(list);
+        ck_assert_str_eq(returned, "A");
+        ck_assert_str_eq(list->head->data, "C");
+        ck_assert_str_eq(list->tail->data, "B");
+        free(returned);
+        returned = lrsll_popBack(list);
+        ck_assert_str_eq(returned, "B");
+        ck_assert_str_eq(list->head->data, "C");
+        ck_assert_str_eq(list->tail->data, "C");
+        free(returned);
+        returned = lrsll_popBack(list);
+        ck_assert_str_eq(returned, "C");
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+        free(returned);
+    }
+END_TEST
+
+START_TEST(popFront_empty)
+    {
+        ck_assert_ptr_eq(lrsll_popFront(list), NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+    }
+END_TEST
+
+START_TEST(popBack_empty)
+    {
+        ck_assert_ptr_eq(lrsll_popFront(list), NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+    }
+END_TEST
+
+START_TEST(delete_from_empty)
+    {
+        ck_assert_ptr_eq(lrsll_delete(list, "A"), NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+    }
+END_TEST
+
+START_TEST(delete_missing)
+    {
+        lrsll_push(list, "A");
+        ck_assert_ptr_eq(lrsll_delete(list, "B"), NULL);
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "A");
+    }
+END_TEST
+
+START_TEST(delete_only)
+    {
+        lrsll_push(list, "A");
+        lrsll_node *deleted = lrsll_delete(list, "A");
+        ck_assert_ptr_ne(deleted, NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+        ck_assert_str_eq(deleted->data, "A");
+        lrsll_freeNode(deleted);
+    }
+END_TEST
+
+START_TEST(delete_head_of_two)
+    {
+        lrsll_push(list, "B");
+        lrsll_push(list, "A");
+        lrsll_node *deleted = lrsll_delete(list, "A");
+        ck_assert_ptr_ne(deleted, NULL);
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "B");
+        ck_assert_str_eq(deleted->data, "A");
+        lrsll_freeNode(deleted);
+    }
+END_TEST
+
+START_TEST(delete_tail_of_two)
+    {
+        lrsll_push(list, "A");
+        lrsll_push(list, "B");
+        lrsll_node *deleted = lrsll_delete(list, "A");
+        ck_assert_ptr_ne(deleted, NULL);
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "B");
+        ck_assert_str_eq(deleted->data, "A");
+        lrsll_freeNode(deleted);
+    }
+END_TEST
+
+START_TEST(delete_head_of_three)
+    {
+        lrsll_push(list, "C");
+        lrsll_push(list, "B");
+        lrsll_push(list, "A");
+        lrsll_node *deleted = lrsll_delete(list, "A");
+        ck_assert_ptr_ne(deleted, NULL);
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "C");
+        ck_assert_str_eq(deleted->data, "A");
+        lrsll_freeNode(deleted);
+    }
+END_TEST
+
+START_TEST(delete_middle_of_three)
+    {
+        lrsll_push(list, "C");
+        lrsll_push(list, "B");
+        lrsll_push(list, "A");
+        lrsll_node *deleted = lrsll_delete(list, "B");
+        ck_assert_ptr_ne(deleted, NULL);
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "C");
+        ck_assert_str_eq(deleted->data, "B");
+        lrsll_freeNode(deleted);
+    }
+END_TEST
+
+START_TEST(delete_tail_of_three)
+    {
+        lrsll_push(list, "C");
+        lrsll_push(list, "B");
+        lrsll_push(list, "A");
+        lrsll_node *deleted = lrsll_delete(list, "C");
+        ck_assert_ptr_ne(deleted, NULL);
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "B");
+        ck_assert_str_eq(deleted->data, "C");
+        lrsll_freeNode(deleted);
+    }
+END_TEST
+
+START_TEST(add_before_empty)
+    {
+        ck_assert_ptr_eq(lrsll_addBefore(list, "A", "B"), NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+    }
+END_TEST
+
+START_TEST(add_after_empty)
+    {
+        ck_assert_ptr_eq(lrsll_addAfter(list, "A", "B"), NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+    }
+END_TEST
+
+START_TEST(add_before_missing_length_1)
+    {
+        lrsll_push(list, "C");
+        ck_assert_ptr_eq(lrsll_addBefore(list, "A", "B"), NULL);
+        ck_assert_str_eq(list->head->data, "C");
+        ck_assert_str_eq(list->tail->data, "C");
+    }
+END_TEST
+
+START_TEST(add_after_missing_length_1)
+    {
+        lrsll_push(list, "C");
+
+        ck_assert_ptr_eq(lrsll_addAfter(list, "A", "B"), NULL);
+        ck_assert_str_eq(list->head->data, "C");
+        ck_assert_str_eq(list->tail->data, "C");
+    }
+END_TEST
+
+START_TEST(add_after_missing)
+    {
+        lrsll_push(list, "C");
+        lrsll_push(list, "B");
+        ck_assert_ptr_eq(lrsll_addAfter(list, "D", "F"), NULL);
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "C");
+    }
+END_TEST
+
+START_TEST(add_before_missing)
+    {
+        lrsll_push(list, "C");
+        lrsll_push(list, "B");
+        ck_assert_ptr_eq(lrsll_addBefore(list, "D", "F"), NULL);
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "C");
+    }
+END_TEST
+
+START_TEST(add_before_length_1)
+    {
+        lrsll_push(list, "A");
+        ck_assert_ptr_ne(lrsll_addBefore(list, "A", "B"), NULL);
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "A");
+    }
+END_TEST
+
+START_TEST(add_after_length_1)
+    {
+        lrsll_push(list, "A");
+        ck_assert_ptr_ne(lrsll_addAfter(list, "A", "B"), NULL);
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "B");
+    }
+END_TEST
+
+START_TEST(add_before)
+    {
+        lrsll_push(list, "A");
+        lrsll_append(list, "B");
+        lrsll_append(list, "C");
+        ck_assert_ptr_ne(lrsll_addBefore(list, "B", "Z"), NULL);
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "C");
+        free(lrsll_popBack(list));
+        ck_assert_str_eq(list->tail->data, "B");
+        free(lrsll_popFront(list));
+        ck_assert_str_eq(list->head->data, "Z");
+    }
+END_TEST
+
+START_TEST(add_after)
+    {
+        lrsll_push(list, "A");
+        lrsll_append(list, "B");
+        lrsll_append(list, "C");
+        ck_assert_ptr_ne(lrsll_addAfter(list, "B", "Z"), NULL);
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "C");
+        free(lrsll_popBack(list));
+        ck_assert_str_eq(list->tail->data, "Z");
+        free(lrsll_popFront(list));
+        ck_assert_str_eq(list->head->data, "B");
+    }
+END_TEST
+
+START_TEST(search_first)
+    {
+        lrsll_push(list, "A");
+        lrsll_node *found = lrsll_find(list, "A");
+        ck_assert_ptr_ne(found, NULL);
+        ck_assert_str_eq(found->data, "A");
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "A");
+    }
+END_TEST
+
+START_TEST(search_last)
+    {
+        lrsll_push(list, "B");
+        lrsll_push(list, "A");
+        lrsll_node *found = lrsll_find(list, "A");
+        ck_assert_ptr_ne(found, NULL);
+        ck_assert_str_eq(found->data, "A");
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "B");
+    }
+END_TEST
+
+START_TEST(search_middle)
+    {
+        lrsll_push(list, "C");
+        lrsll_push(list, "A");
+        lrsll_push(list, "B");
+        lrsll_node *found = lrsll_find(list, "A");
+        ck_assert_ptr_ne(found, NULL);
+        ck_assert_str_eq(found->data, "A");
+        ck_assert_str_eq(list->head->data, "B");
+        ck_assert_str_eq(list->tail->data, "C");
+    }
+END_TEST
+
+START_TEST(search_missing)
+    {
+        lrsll_push(list, "A");
+        lrsll_node *found = lrsll_find(list, "B");
+        ck_assert_ptr_eq(found, NULL);
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "A");
+    }
+END_TEST
+
+START_TEST(search_empty)
+    {
+        lrsll_node *found = lrsll_find(list, "A");
+        ck_assert_ptr_eq(found, NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+    }
+END_TEST
+
+START_TEST(top)
+    {
+        lrsll_push(list, "A");
+        lrsll_node *top = lrsll_top(list);
+        ck_assert_ptr_ne(top, NULL);
+        ck_assert_str_eq(top->data, "A");
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "A");
+    }
+END_TEST
+
+START_TEST(tail)
+    {
+        lrsll_push(list, "A");
+        lrsll_node *tail = lrsll_tail(list);
+        ck_assert_ptr_ne(tail, NULL);
+        ck_assert_str_eq(tail->data, "A");
+        ck_assert_str_eq(list->head->data, "A");
+        ck_assert_str_eq(list->tail->data, "A");
+    }
+END_TEST
+
+START_TEST(top_empty)
+    {
+        lrsll_node *top = lrsll_top(list);
+        ck_assert_ptr_eq(top, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+    }
+END_TEST
+
+START_TEST(tail_empty)
+    {
+        lrsll_node *tail = lrsll_tail(list);
+        ck_assert_ptr_eq(tail, NULL);
+        ck_assert_ptr_eq(list->tail, NULL);
+        ck_assert_ptr_eq(list->head, NULL);
+    }
+END_TEST
+
+
+Suite *list_suite(void) {
+    Suite *s = suite_create("Single Linked List");
+
+    TCase *tc_core = tcase_create("Core");
+    tcase_add_checked_fixture(tc_core, setup, teardown);
+    tcase_add_test(tc_core, create_list);
+    suite_add_tcase(s, tc_core);
+
+    TCase *tc_pushPop = tcase_create("Push/Pop");
+    tcase_add_checked_fixture(tc_pushPop, setup, teardown);
+    tcase_add_test(tc_pushPop, push);
+    tcase_add_test(tc_pushPop, append);
+    tcase_add_test(tc_pushPop, popFront);
+    tcase_add_test(tc_pushPop, popBack);
+    tcase_add_test(tc_pushPop, popFront_empty);
+    tcase_add_test(tc_pushPop, popBack_empty);
+    suite_add_tcase(s, tc_pushPop);
+
+    TCase *tc_free = tcase_create("Free");
+    tcase_add_checked_fixture(tc_free, setup, doNothing);
+    tcase_add_test(tc_free, free_list_does_not_segfault);
+    tcase_add_test(tc_free, free_empty_list_does_not_segfault);
+    tcase_add_test(tc_free, free_node_does_not_segfault);
+    tcase_add_test(tc_free, free_empty_node_does_not_segfault);
+    suite_add_tcase(s, tc_free);
+
+    TCase *tc_delete = tcase_create("Delete");
+    tcase_add_checked_fixture(tc_delete, setup, teardown);
+    tcase_add_test(tc_core, delete_from_empty);
+    tcase_add_test(tc_core, delete_missing);
+    tcase_add_test(tc_core, delete_only);
+    tcase_add_test(tc_core, delete_head_of_two);
+    tcase_add_test(tc_core, delete_tail_of_two);
+    tcase_add_test(tc_core, delete_head_of_three);
+    tcase_add_test(tc_core, delete_middle_of_three);
+    tcase_add_test(tc_core, delete_tail_of_three);
+    suite_add_tcase(s, tc_delete);
+
+    TCase *tc_add = tcase_create("Add");
+    tcase_add_checked_fixture(tc_add, setup, teardown);
+    tcase_add_test(tc_core, add_before_empty);
+    tcase_add_test(tc_core, add_after_empty);
+    tcase_add_test(tc_core, add_after_missing);
+    tcase_add_test(tc_core, add_before_missing);
+    tcase_add_test(tc_core, add_before_missing_length_1);
+    tcase_add_test(tc_core, add_after_missing_length_1);
+    tcase_add_test(tc_core, add_before_length_1);
+    tcase_add_test(tc_core, add_after_length_1);
+    tcase_add_test(tc_core, add_before);
+    tcase_add_test(tc_core, add_after);
+    suite_add_tcase(s, tc_add);
+
+    TCase *tc_search = tcase_create("Search");
+    tcase_add_checked_fixture(tc_search, setup, teardown);
+    tcase_add_test(tc_core, search_first);
+    tcase_add_test(tc_core, search_last);
+    tcase_add_test(tc_core, search_middle);
+    tcase_add_test(tc_core, search_missing);
+    tcase_add_test(tc_core, search_empty);
+    suite_add_tcase(s, tc_search);
+
+    TCase *tc_topTail = tcase_create("Top/Tail");
+    tcase_add_checked_fixture(tc_topTail, setup, teardown);
+    tcase_add_test(tc_core, top);
+    tcase_add_test(tc_core, tail);
+    tcase_add_test(tc_core, top_empty);
+    tcase_add_test(tc_core, tail_empty);
+    suite_add_tcase(s, tc_topTail);
+
+    return s;
+}
 
 int main() {
-    lrsll_list *list = createList();
 
-    /* Start test helper functions */
+    int number_failed;
+    Suite *s;
+    SRunner *sr;
 
-    void printList() {
-        lrsll_printList(list);
-    }
+    s = list_suite();
+    sr = srunner_create(s);
+    srunner_set_fork_status(sr, CK_NOFORK);
 
-    void printPointers() {
-        printHead(list);
-        printTail(list);
-        printList();
-    }
-
-    lrsll_node *add(bool append, char *item) {
-        fprintf(stdout, "\n%s %s to the list...", append ? "Appending" : "Pushing", item);
-        lrsll_node *result = append ? lrsll_append(list, item) : lrsll_push(list, item);
-        printPointers();
-        return result;
-    }
-
-    lrsll_node *push(char *item) {
-        return add(false, item);
-    }
-
-    lrsll_node *append(char *item) {
-        return add(true, item);
-    }
-
-    void *retrieve(bool front) {
-        fprintf(stdout, "\n%s element from list...", front ? "Popping" : "Slicing");
-        char *returned = front ? lrsll_popFront(list) : lrsll_popBack(list);
-        fprintf(stdout, "\n\tRetrieved %s from list", returned ? returned : "nothing");
-        if (returned)
-            free(returned);
-        printPointers();
-    }
-
-    char *pop() {
-        retrieve(true);
-    }
-
-    char *slice() {
-        retrieve(false);
-    }
-
-    void delete(char *item) {
-        fprintf(stdout, "\nDeleting %s from list...", item);
-        lrsll_node *deletedNode = lrsll_delete(list, item);
-        if (deletedNode) {
-            if (deletedNode->data) {
-                fprintf(stdout, "\n\tDeleted %s", deletedNode->data);
-                free(deletedNode->data);
-            }
-            free(deletedNode);
-        } else {
-            fprintf(stdout, "\n\t%s not found in list", item);
-        }
-        printPointers();
-    }
-
-    void addNextTo(bool after, char *data, char *searchItem) {
-        fprintf(stdout, "\nAttempting to add %s %s %s", data, after ? "after" : "before", searchItem);
-        lrsll_node *result = after ? lrsll_addAfter(list, searchItem, data) : lrsll_addBefore(list, searchItem, data);
-        if (result) {
-            if (result->data) {
-                fprintf(stdout, "\n\tSuccessfully added %s", data);
-            }
-        } else {
-            fprintf(stdout, "\n\tCouldn't find %s in list", searchItem);
-        }
-        printPointers();
-    }
-
-    void addAfter(char *searchItem, char *data) {
-        addNextTo(true, data, searchItem);
-    }
-
-    void addBefore(char *searchItem, char *data) {
-        addNextTo(false, data, searchItem);
-    }
-
-    void find(char *searchItem) {
-        lrsll_node *result= lrsll_find( list, searchItem);
-        if(result && result->data) {
-            fprintf(stdout, "\n\tFound node %s", result->data);
-        } else {
-            fprintf(stdout, "\n\tCouldn't find %s", searchItem);
-        }
-        printPointers();
-    }
-
-
-
-    /*End test helper functions*/
-
-    info("Push and append");
-    printPointers();
-    info("Push C");
-    push("C");
-    info("Push B");
-    push("B");
-    info("Push A");
-    push("A");
-    info("Append D");
-    append("D");
-    info("Append E");
-    append("E");
-
-    info("Pop");
-    pop();
-    info("Slice");
-    slice();
-
-    //Deletions
-    info("Delete non-existent node");
-    delete("Z");
-    info("Delete existing nodes from front of list");
-    delete("B");
-    info("Append E for next test");
-    append("E");
-    info("Delete existing nodes from back of list");
-    delete("E");
-    info("Push B for next test");
-    push("B");
-    info("Delete existing nodes from middle of list");
-    delete("C");
-    info("Delete first node from list with two elements");
-    delete("B");
-    info("Add node back to front of list");
-    push("C");
-    info("Delete D for next test");
-    delete("D");
-    info("Delete last node in list with two elements");
-    delete("C");
-    info("Delete non-existent node from empty list");
-    delete("E");
-
-    //adds
-    info("Add before non-existent node in an empty list");
-    addBefore("C", "A");
-    info("Add after non-existent node in an empty list");
-    addAfter("C", "A");
-    info("Push B for next test");
-    push("B");
-    info("Add before non-existent node in a 1 element list");
-    addBefore("C", "F");
-    info("Add after non-existent node in a 1 element list");
-    addAfter("C", "F");
-    info("Push A for next test");
-    push("A");
-    info("Add before non-existent node in a > 1 element list");
-    addBefore("C", "F");
-    info("Add after non-existent node in a > 1 element list");
-    addAfter("C", "F");
-    info("Pop for next test");
-    pop();
-    info("Add before node in a 1 element list");
-    addBefore("B", "A");
-    info("Pop for next test");
-    pop();
-    info("Add after node in a 1 element list");
-    addAfter("B", "C");
-    info("Push A for next test");
-    push("A");
-    info("Add before node in a > 1 element list");
-    addBefore("B", "A1");
-    info("Add after node in a > 1 element list");
-    addAfter("B", "B1");
-    info("Add before head node in a list");
-    addBefore("A", "A-");
-    info("Add after tail node in a list");
-    addAfter("C", "D");
-
-    //search
-    info("Find first node");
-    find("A-");
-    info("Find last node");
-    find("D");
-    info("Find middle node");
-    find("B");
-    info("Find non-existent node");
-    find("Nope");
-    info("Empty list in preparation for find in empty list");
-    while(list->head) {
-        pop();
-    }
-    info("Find in empty list");
-    find("A");
+    srunner_run_all(sr, CK_NORMAL);
+    number_failed = srunner_ntests_failed(sr);
+    srunner_free(sr);
+    return number_failed < 1 ? EXIT_SUCCESS : EXIT_FAILURE;
 }

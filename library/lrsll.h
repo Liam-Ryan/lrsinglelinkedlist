@@ -14,7 +14,12 @@ typedef struct lrsll_list {
     lrsll_node *tail;
 } lrsll_list;
 
-lrsll_list *createList();
+
+void lrsll_freeList(lrsll_list *list);
+
+void lrsll_freeNode(lrsll_node *node);
+
+lrsll_list *lrsll_createList();
 
 lrsll_node *lrsll_push(lrsll_list *list, char *data);
 
