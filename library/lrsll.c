@@ -2,6 +2,29 @@
 #include <string.h>
 #include "lrsll.h"
 
+
+void lrsll_freeList(lrsll_list *list) {
+    if (!list)
+        return;
+
+    lrsll_node *currentNode = list->head;
+    while (currentNode != NULL) {
+        lrsll_node *delete = currentNode;
+        currentNode = currentNode->next;
+        lrsll_freeNode(delete);
+    }
+    free(list);
+}
+
+void lrsll_freeNode(lrsll_node *node) {
+    if (!node)
+        return;
+    if (node->data)
+        free(node->data);
+    free(node);
+}
+
+//TODO implement testing of stdout
 void lrsll_printList(lrsll_list *list) {
     lrsll_node *temp = list->head;
     fprintf(stdout, "\nCurrent list - \n");
@@ -76,9 +99,7 @@ char *lrsll_popFront(lrsll_list *list) {
         list->tail = NULL;
 
     char *string = strdup(oldHead->data);
-    free(oldHead->data);
-    free(oldHead);
-
+    lrsll_freeNode(oldHead);
     return string;
 };
 
@@ -100,9 +121,8 @@ char *lrsll_popBack(lrsll_list *list) {
         list->tail = *newTail;
         list->tail->next = NULL;
     }
-    free(oldTail->data);
-    free(oldTail);
 
+    lrsll_freeNode(oldTail);
     return string;
 };
 
