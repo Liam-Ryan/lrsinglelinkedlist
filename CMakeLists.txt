@@ -75,6 +75,7 @@ add_subdirectory(test)
 
 ###############################################################################
 # Unit tests
-enable_testing()
-add_test(NAME test_create_list COMMAND test_create_list)
+ENABLE_TESTING()
+ADD_TEST(UnitTests testexec)
+
 
