@@ -24,7 +24,7 @@ void lrsll_freeNode(lrsll_node *node) {
     free(node);
 }
 
-//TODO implement testing of stdout
+//TODO implement testing of stdout or take stream as argument?
 void lrsll_printList(lrsll_list *list) {
     lrsll_node *temp = list->head;
     fprintf(stdout, "\nCurrent list - \n");
@@ -42,7 +42,7 @@ lrsll_list *lrsll_createList() {
     return list;
 }
 
-//TODO investigate overloading in C
+//TODO investigate overloading in C - variadic macro?
 lrsll_node *lrsll_createNode(char *data, lrsll_node *next) {
     if (data == NULL || strlen(data) < 0)
         return NULL;
@@ -136,6 +136,7 @@ lrsll_node *lrsll_find(lrsll_list *list, char *data) {
     return n;
 };
 
+//!WARNING! convoluted approach for the sake of learning, don't do what Donny Don't does!
 lrsll_node *lrsll_delete(lrsll_list *list, char *data) {
     lrsll_node **node = &list->head;
     while (*node && strcmp((*node)->data, data) != 0) {
@@ -160,6 +161,12 @@ lrsll_node *lrsll_delete(lrsll_list *list, char *data) {
          * https://codereview.stackexchange.com/questions/175398/delete-node-from-singly-linked-list-with-tail-pointer-in-c
          * */
         list->tail = (node == &list->head) ? NULL : (lrsll_node*) ((char*)node - offsetof(lrsll_node, next));
+        /* Here we cast node to a char pointer which has a size of 1 byte. When you add or subtract you are adding or
+         * subtracting the pointer length. Without this cast if offsetof were 8 for next you would actually subtract 128
+         * bytes from the address as sizeof(lrsll_node) is 16. So we subtract offsetof bytes from where we currently are
+         * which brings us to the address of the struct containing the next pointer which brought us to deleted node. i.e
+         * the new tail
+         * */
     }
 
     return deleted;
