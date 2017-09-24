@@ -3,15 +3,16 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 typedef struct lrsll_node {
-    struct lrsll_node *next;
-    char *data;
+	struct lrsll_node *next;
+	char *data;
 } lrsll_node;
 
 typedef struct lrsll_list {
-    lrsll_node *head;
-    lrsll_node *tail;
+	lrsll_node *head;
+	lrsll_node *tail;
 } lrsll_list;
 
 
@@ -43,6 +44,6 @@ lrsll_node *lrsll_addBefore(lrsll_list *list, char *item, char *data);
 
 lrsll_node *lrsll_addAfter(lrsll_list *list, char *item, char *data);
 
-void lrsll_printList(lrsll_list *list);
+void lrsll_printList(lrsll_list *list, FILE *stream);
 
 #endif
